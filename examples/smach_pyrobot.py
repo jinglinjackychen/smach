@@ -6,7 +6,8 @@ import smach_ros
 import time
 from pyrobot import Robot
 
-bot = Robot("locobot")
+base_config_dict={'base_controller': 'ilqr'}
+bot = Robot('locobot', base_config=base_config_dict)
 
 # define state GoHome
 class GoHome(smach.State):
@@ -15,8 +16,10 @@ class GoHome(smach.State):
         self.counter = 0
 
     def execute(self, userdata):
+        target_position = [0,0,0]
         rospy.loginfo('Executing state GoHome')
-        bot.arm.go_home()
+        #bot.arm.go_home()
+        bot.base.go_to_absolute(target_position)
         if self.counter < 3:
             self.counter += 1
             return 'outcome1'
@@ -30,10 +33,12 @@ class Move(smach.State):
         smach.State.__init__(self, outcomes=['outcome2'])
 
     def execute(self, userdata):
+        target_position = [0.3,0,0]
         target_joints = [[0.408, 0.721, -0.471, -1.4, 0.920], [-0.675, 0, 0.23, 1, -0.70]]
         rospy.loginfo('Moving')
         for joint in target_joints:
-                bot.arm.set_joint_positions(joint, plan=False)
+                #bot.arm.set_joint_positions(joint, plan=False)
+                bot.base.go_to_absolute(target_position)
                 time.sleep(1)
         return 'outcome2'
 
